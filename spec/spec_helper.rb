@@ -1,4 +1,4 @@
 require 'rspec'
-require 'ally/version'
+require 'ally'
 
 include Ally
