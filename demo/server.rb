@@ -8,6 +8,8 @@ end
 
 server.bind(:onmessage) do |ws, data, type|
   puts "Message received"
+
+  # socket.push data
 end
 
 server.bind(:onerror) do |ws, code, reason|
@@ -15,7 +17,7 @@ server.bind(:onerror) do |ws, code, reason|
 end
 
 server.bind(:onclose) do |ws, code, reason|
-  puts "Connection closed"
+  puts "Connection closed: #{code} - #{reason}"
 end
 
 server.start

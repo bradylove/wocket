@@ -4,3 +4,4 @@ pkg/
 vendor/cache/*.gem
 tmp/
 .ruby-version
+.rbenv.gemsets

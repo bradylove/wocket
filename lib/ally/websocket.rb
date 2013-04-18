@@ -34,6 +34,7 @@ module Ally
       @socket    = socket
       @server    = server
       @state     = :connecting
+      @stop_read = false
 
       validate_handshake
     end
@@ -47,10 +48,9 @@ module Ally
     # @param data [String] String of data to be pushed to the client.
     # @param type [Symbol] The type of data to send to the client. Must be :text
     #   or :binary
-    def push(data, type = :text)
-      puts data
+    def push(data = '', type = :text)
       frame = outgoing_frame.new(version: @version, data: data, type: type)
-      @socket << frame.to_s
+      @socket.write frame.to_s
     end
     alias_method :write, :push
 
@@ -60,15 +60,26 @@ module Ally
     # @param code [Integer] Disconnect status code.
     #   See http://tools.ietf.org/html/rfc6455#section-7.4.1
     # @param reason [String] An explanation why the connection is being closed.
-    def close(code = STATUS_CODES[:normal_closure], reason = "Normal closure")
-      cancel_timer!
+    def close(code = :normal_closure, reason = "normal closure")
+      code = STATUS_CODES[code]
+      @stop_read = true
 
       unless @socket.closed?
+        @socket.write outgoing_frame.new(version: @version,
+                                         data:    reason,
+                                         type:    :close,
+                                         code:    code).to_s
+
         @socket.close
       end
 
       @state = :disconnected
       @server.trigger(:onclose, self, code, reason)
+    end
+
+    # Send a ping message to the client
+    def ping
+
     end
 
    private
@@ -83,7 +94,9 @@ module Ally
         @socket.write handshake.to_s
         @state = :connected
         @server.trigger(:onopen, self)
-        start_timer!
+
+        @socket.wait_readable
+        async.read
       else
         @state = :invalid_handshake
         @socket.write "HTTP/1.1 400 Bad Request"
@@ -95,21 +108,58 @@ module Ally
 
     def read
       loop do
+        break if @stop_read
+
         incoming_frame << readpartial until msg = incoming_frame.next
 
+        case msg.type
+        when :text
+          handle_text_message(msg)
+        when :binary
+          handle_binary_message(msg)
+        when :ping
+          handle_ping(msg)
+        when :close
+          handle_close(msg)
+        else
+          # Do nothing for now
+        end
+      end
+    rescue EOFError, Errno::ECONNRESET, IOError
+      puts "Socket Gone, where did it go?"
+      # close
+    end
+
+    def handle_text_message(msg)
+      case msg.data.size
+      when 0, *(125..128).to_a, *(65535..65536).to_a
+        push msg.data
+      else
         @server.trigger(:onmessage, self, msg.data, msg.type)
       end
-    rescue EOFError, Errno::ECONNRESET
+    end
+
+    def handle_binary_message(msg)
+      case msg.data.size
+      when 0, *(125..128).to_a, *(65535..65536).to_a
+        push msg.data, :binary
+      else
+        @server.trigger(:onmessage, self, msg.data, msg.type)
+      end
+    end
+
+    def handle_ping(msg)
+      if msg.data.length > 125
+        # For some reason websockets-ruby isn't passing on PINGS that are too large
+        close :protocol_error, "ping message too large"
+      else
+        frame = outgoing_frame.new(version: @version, type: :pong, data: msg.data)
+        @socket << frame.to_s
+      end
+    end
+
+    def handle_close(msg)
       close
-    end
-
-    def start_timer!
-      cancel_timer!
-      @timer = every(1) { read }
-    end
-
-    def cancel_timer!
-      @timer && @timer.cancel
     end
 
     def readpartial

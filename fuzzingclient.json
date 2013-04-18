@@ -1,0 +1,17 @@
+
+{
+  "options": {"failByDrop": false},
+  "outdir": "./reports/servers",
+
+  "servers": [
+    {
+      "agent": "Ally 0.0.1",
+      "url": "ws://127.0.0.1:9292",
+      "options": {"version": 13}
+    }
+  ],
+
+  "cases": ["1.*"],
+  "exclude-cases": [],
+  "exclude-agent-cases": {}
+}

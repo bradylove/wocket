@@ -29,7 +29,8 @@ class WSClient
     if @handshake.valid?
       @version = @handshake.version
       puts "Valid Handshake ##{@id}"
-      async.start_timer
+
+       async.send_random_data
     end
   end
 
@@ -37,24 +38,27 @@ class WSClient
     frame = WebSocket::Frame::Incoming::Client.new(version: @version)
     frame << @socket.readpartial(4096) until msg = frame.next
 
-
     puts "Received: #{msg.data}"
+
+    send_random_data
   end
 
-  def start_timer
-    cancel_timer!
-    @timer = every(3) { send_random_data }
-  end
+  # def start_timer
+  #   cancel_timer!
+  #   @timer = every(3) { send_random_data }
+  # end
 
-  def cancel_timer!
-    @timer && @timer.cancel
-  end
+  # def cancel_timer!
+  #   @timer && @timer.cancel
+  # end
 
   def send_random_data
-    @socket << WebSocket::Frame::Outgoing::Client.new(version: @version, data: "Hello world! How are you doing today?", type: :text).to_s
-    puts "Sent frame"
+    after(5) {
+      @socket << WebSocket::Frame::Outgoing::Client.new(version: @version, data: "Hello world! How are you doing today?", type: :text).to_s
+      puts "Sent frame"
 
-    read
+      read
+    }
   end
 end
 
