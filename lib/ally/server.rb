@@ -35,7 +35,7 @@ module Ally
   private
 
     def startup_message
-      msg = "Protozoan server now listening on port #{@port}\n"
+      msg = "Ally server now listening on port #{@port}\n"
       msg += "-" * 45
       msg
     end

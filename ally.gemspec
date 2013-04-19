@@ -19,6 +19,7 @@ Gem::Specification.new do |gem|
 
   gem.add_runtime_dependency 'celluloid-io'
   gem.add_runtime_dependency 'websocket'
+  gem.add_runtime_dependency 'websocket-native'
 
   gem.add_development_dependency 'bundler', '~> 1.0'
   gem.add_development_dependency 'rake', '~> 0.8'
