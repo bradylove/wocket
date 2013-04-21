@@ -17,6 +17,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ['lib']
 
+
   gem.add_runtime_dependency 'celluloid-io'
   gem.add_runtime_dependency 'websocket'
   gem.add_runtime_dependency 'websocket-native'
@@ -28,6 +29,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'yard', '~> 0.8'
   gem.add_development_dependency 'guard-rspec'
   gem.add_development_dependency 'rb-inotify'
-  gem.add_development_dependency "websocket"
   gem.add_development_dependency 'pry-nav'
 end

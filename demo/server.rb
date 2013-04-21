@@ -3,13 +3,13 @@ require 'ally'
 server = Ally::Server.new
 
 server.bind(:onopen) do |ws|
-  puts "Client connected :)"
+  puts "Client connected"
 end
 
 server.bind(:onmessage) do |ws, data, type|
   puts "Message received"
 
-  # socket.push data
+  ws.push data, type
 end
 
 server.bind(:onerror) do |ws, code, reason|

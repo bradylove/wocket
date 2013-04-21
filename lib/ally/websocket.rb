@@ -110,22 +110,29 @@ module Ally
       loop do
         break if @stop_read
 
-        incoming_frame << readpartial until msg = incoming_frame.next
 
-        case msg.type
-        when :text
-          handle_text_message(msg)
-        when :binary
-          handle_binary_message(msg)
-        when :ping
-          handle_ping(msg)
-        when :close
-          handle_close(msg)
-        else
-          # Do nothing for now
+        incoming_frame << readpartial until msg = incoming_frame.next || incoming_frame.error
+
+        if incoming_frame.error
+          handle_invalid_frame(incoming_frame)
+
+          @incoming_frame = nil
+        elsif msg
+          case msg.type
+          when :text
+            handle_text_message(msg)
+          when :binary
+            handle_binary_message(msg)
+          when :ping
+            handle_ping(msg)
+          when :close
+            handle_close(msg)
+          else
+            # Do nothing for now
+          end
         end
       end
-    rescue EOFError, Errno::ECONNRESET, IOError
+    rescue EOFError, Errno::ECONNRESET, IOError, Errno::EPIPE
       puts "Socket Gone, where did it go?"
       # close
     end
@@ -160,6 +167,27 @@ module Ally
 
     def handle_close(msg)
       close
+    end
+
+    def handle_invalid_frame(invalid_frame)
+      case incoming_frame.error
+      when :control_frame_payload_too_long
+        close :protocol_error, "protocol error: control frame too long"
+      when :reserved_bit_used
+        close :protocol_error, "protocol error: reserved bit used"
+      when :unknown_opcode
+        close :protocol_error, "protocol error: unknown opcode"
+      when :fragmented_control_frame
+        close :protocol_error, "protocol error: fragmented control frame"
+      when :unexpected_continuation_frame
+        close :protocol_error, "protocol error: unexpected continuation frame"
+      when :data_frame_instead_continuation
+        close :protocol_error, "protocol error: data frame instead continuation"
+      when :invalid_payload_encoding
+        close :inconsistent_data, "inconsistent data error: invalid payload encoding"
+      else
+        puts incoming_frame.error
+      end
     end
 
     def readpartial

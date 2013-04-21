@@ -1,0 +1,6 @@
+[submodule "vendor/websocket"]
+	path = vendor/websocket
+	url = https://github.com/imanel/websocket-ruby.git
+[submodule "vendor/websocket-ruby"]
+	path = vendor/websocket-ruby
+	url = https://github.com/imanel/websocket-ruby.git
