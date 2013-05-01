@@ -4,7 +4,7 @@
 
   "servers": [
     {
-      "agent": "Ally 0.0.1",
+      "agent": "Wocket 0.0.1",
       "url": "ws://127.0.0.1:9292",
       "options": {"version": 13}
     }

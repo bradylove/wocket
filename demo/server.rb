@@ -1,6 +1,6 @@
-require 'ally'
+require 'wocket'
 
-server = Ally::Server.new
+server = Wocket::Server.new
 
 server.bind(:onopen) do |ws|
   puts "Client connected"

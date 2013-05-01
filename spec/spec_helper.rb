@@ -1,4 +1,4 @@
 require 'rspec'
-require 'ally'
+require 'wocket'
 
-include Ally
+include Wocket
