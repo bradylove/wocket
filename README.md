@@ -5,19 +5,52 @@
 
 ## Description
 
-TODO: Description
-
-## Features
-
-## Examples
-
-    require 'wocket'
-
-## Requirements
+Wocket is a simple WebSocket server and client built on top of Celluloid::IO.
+Currently only the server portion of Wocket is useable. I have been testing Wocket
+using [http://autobahn.ws/testsuite](http://autobahn.ws/testsuite) and only have a handful of cases where I am seeing red.
 
 ## Install
 
     $ gem install wocket
+
+## Examples
+### Server
+
+Save the following as a .rb file. Ex server.rb
+
+    require 'wocket'
+    server = Wocket::Server.new
+
+    server.bind(:onopen) do |ws|
+      puts "Client connected"
+    end
+
+    server.bind(:onmessage) do |ws, data, type|
+      puts "Message received"
+    end
+
+    server.bind(:onerror) do |ws, code, reason|
+      puts "ERROR: Code: #{code}, Reason: #{reason}"
+    end
+
+    server.bind(:onclose) do |ws, code, reason|
+      puts "Connection closed: #{code} - #{reason}"
+    end
+
+    server.start
+
+    trap("INT") { server.terminate; exit }
+    sleep
+
+Then run it :)
+
+     $ ruby server.rb
+
+This will start wocket on port 9292. More details coming soon :)
+
+### Client
+
+Not yet available.
 
 ## Copyright
 
