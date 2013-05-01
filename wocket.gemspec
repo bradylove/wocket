@@ -5,8 +5,8 @@ require File.expand_path('../lib/wocket/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.name          = "wocket"
   gem.version       = Wocket::VERSION
-  gem.summary       = %q{TODO: Summary}
-  gem.description   = %q{TODO: Description}
+  gem.summary       = %q{Simple WebSocket server built on top of Celluloid::IO}
+  gem.description   = %q{Simple WebSocket server built on top of Celluloid::IO}
   gem.license       = "MIT"
   gem.authors       = ["Brady Love"]
   gem.email         = "love.brady@gmail.com"
