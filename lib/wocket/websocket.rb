@@ -1,6 +1,5 @@
 require 'websocket'
 require 'celluloid'
-require 'pry'
 
 module Wocket
   class WebSocket
